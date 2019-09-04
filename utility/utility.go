@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zpnk/go-bitly"
 )
 
@@ -17,14 +18,20 @@ const URL = "https://www.amazon.it/Offerta-Lampo-Kindle/b?ie=UTF8&node=568948703
 type Deal struct {
 	Title  string
 	Author string
+	Cover  string
 	Price  string
 	Link   string
 }
 
-func getWebpage() io.ReadCloser {
-	resp, err := http.Get(URL)
+func getWebpage(url string) io.ReadCloser {
+	var client http.Client
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Golang_Spider_Bot/3.0")
+
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil
+		log.Fatal(err)
 	}
 
 	if resp.StatusCode != 200 {
@@ -37,7 +44,10 @@ func getWebpage() io.ReadCloser {
 // RetrieveDeals ottiene le offerte lampo del giorno e le restituisce in un vettore di Deal
 func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 
-	doc, err := goquery.NewDocumentFromReader(getWebpage())
+	body := getWebpage(URL)
+	defer body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +63,10 @@ func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 			var deal Deal
 
 			linksuffix, _ := b.Find("a").Attr("href")
+
 			deal.Link = ShortenURL("https://amazon.it"+cleanLink(linksuffix)+"?&tag=shitposting-21", bitly)
+
+			deal.Cover = getCover(deal.Link)
 
 			deal.Title, _ = b.Find("a").Attr("title")
 
@@ -73,6 +86,20 @@ func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 	return deals, err
 }
 
+func getCover(url string) string {
+	body := getWebpage(url)
+	defer body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	d := doc.Find(".a-dynamic-image.frontImage")
+	cover, _ := d.Attr("src")
+	return cover
+}
+
 func cleanLink(link string) string {
 	slices := strings.Split(link, "/")
 
@@ -86,4 +113,17 @@ func cleanLink(link string) string {
 	}
 
 	return newSuffix
+}
+
+// Thank you BomBonio!
+
+// SetupInlineKeyboard is an utility function that makes it easier to build an appropriate set of buttons for reports
+func SetupInlineKeyboard(url string) (keyboard tgbotapi.InlineKeyboardMarkup) {
+
+	row := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Acquista", url))
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+
+	//We finally append the lower row to the keyboard
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard)
+	return
 }
