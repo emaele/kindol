@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/zpnk/go-bitly"
 )
 
 //URL è il link all'offerta lampo per kindle store
@@ -33,7 +34,8 @@ func getWebpage() io.ReadCloser {
 	return resp.Body
 }
 
-func RetrieveDeals() ([]Deal, error) {
+// RetrieveDeals ottiene le offerte lampo del giorno e le restituisce in un vettore di Deal
+func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 
 	doc, err := goquery.NewDocumentFromReader(getWebpage())
 	if err != nil {
@@ -51,7 +53,7 @@ func RetrieveDeals() ([]Deal, error) {
 			var deal Deal
 
 			linksuffix, _ := b.Find("a").Attr("href")
-			deal.Link = "https://amazon.it" + cleanLink(linksuffix)
+			deal.Link = ShortenURL("https://amazon.it"+cleanLink(linksuffix)+"?&tag=shitposting-21", bitly)
 
 			deal.Title, _ = b.Find("a").Attr("title")
 
@@ -74,7 +76,8 @@ func RetrieveDeals() ([]Deal, error) {
 func cleanLink(link string) string {
 	slices := strings.Split(link, "/")
 
-	newSuffix := ""
+	var newSuffix string
+
 	for _, slice := range slices {
 		if strings.HasPrefix(slice, "ref") {
 			return newSuffix

@@ -6,10 +6,14 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/zpnk/go-bitly"
 	"gitlab.com/emaele/kind-ol/utility"
 )
 
-var telegramToken string
+var (
+	telegramToken string
+	bitlyToken    string
+)
 
 func main() {
 
@@ -23,7 +27,10 @@ func main() {
 	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	deals, err := utility.RetrieveDeals()
+	// BitLy authentication
+	bitly := bitly.New(bitlyToken)
+
+	deals, err := utility.RetrieveDeals(bitly)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,6 +42,7 @@ func main() {
 }
 
 func setCLIParams() {
-	flag.StringVar(&telegramToken, "token", "", "Telegram BOTApi token")
+	flag.StringVar(&telegramToken, "telegram", "", "Telegram BOTApi token")
+	flag.StringVar(&bitlyToken, "bitly", "", "BitLy token")
 	flag.Parse()
 }
