@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	//"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambda"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zpnk/go-bitly"
@@ -46,5 +45,4 @@ func mainBot() {
 		msg.ReplyMarkup = utility.SetupInlineKeyboard(deal.Link)
 		bot.Send(msg)
 	}
-
 }
