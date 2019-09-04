@@ -1,13 +1,10 @@
 package utility
 
 import (
-	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zpnk/go-bitly"
 )
 
@@ -23,24 +20,6 @@ type Deal struct {
 	Link   string
 }
 
-func getWebpage(url string) io.ReadCloser {
-	var client http.Client
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "Golang_Spider_Bot/3.0")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if resp.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
-	}
-
-	return resp.Body
-}
-
 // RetrieveDeals ottiene le offerte lampo del giorno e le restituisce in un vettore di Deal
 func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 
@@ -52,35 +31,29 @@ func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 		log.Fatal(err)
 	}
 
-	test := doc.Find(".a-box-group").First()
-
 	var deals []Deal
 
-	test.Find(".a-carousel-col").Each(func(i int, a *goquery.Selection) {
+	doc.Find(".a-carousel").First().Find("li").Each(func(i int, b *goquery.Selection) {
 
-		a.Find("li").Each(func(i int, b *goquery.Selection) {
+		var deal Deal
 
-			var deal Deal
+		linksuffix, _ := b.Find("a").Attr("href")
 
-			linksuffix, _ := b.Find("a").Attr("href")
+		deal.Link = ShortenURL("https://amazon.it"+cleanLink(linksuffix)+"?&tag=shitposting-21", bitly)
 
-			deal.Link = ShortenURL("https://amazon.it"+cleanLink(linksuffix)+"?&tag=shitposting-21", bitly)
+		deal.Cover = getCover(deal.Link)
 
-			deal.Cover = getCover(deal.Link)
+		deal.Title, _ = b.Find("a").Attr("title")
 
-			deal.Title, _ = b.Find("a").Attr("title")
+		deal.Author = b.Find(".acs_product-metadata__contributors").Text()
+		if deal.Author == "" { // L'autore è ficcato in uno spazio a caso
+			deal.Author = strings.TrimSpace(b.Clone().Children().Remove().End().Text())
+		}
 
-			deal.Author = b.Find(".acs_product-metadata__contributors").Text()
-			if deal.Author == "" { // L'autore è ficcato in uno spazio a caso
-				deal.Author = strings.TrimSpace(b.Clone().Children().Remove().End().Text())
-			}
+		price := b.Find(".a-color-price").Text()
+		deal.Price = strings.TrimSpace(price)
 
-			price := b.Find(".a-color-price").Text()
-			deal.Price = strings.TrimSpace(price)
-
-			deals = append(deals, deal)
-		})
-
+		deals = append(deals, deal)
 	})
 
 	return deals, err
@@ -113,17 +86,4 @@ func cleanLink(link string) string {
 	}
 
 	return newSuffix
-}
-
-// Thank you BomBonio!
-
-// SetupInlineKeyboard is an utility function that makes it easier to build an appropriate set of buttons for reports
-func SetupInlineKeyboard(url string) (keyboard tgbotapi.InlineKeyboardMarkup) {
-
-	row := tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonURL("Acquista", url))
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-
-	//We finally append the lower row to the keyboard
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard)
-	return
 }
