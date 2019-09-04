@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -8,9 +9,13 @@ import (
 	"gitlab.com/emaele/kind-ol/utility"
 )
 
+var telegramToken string
+
 func main() {
 
-	bot, err := tgbotapi.NewBotAPI("810364826:AAENsdTQ1hlDUl1ZTZgxMdeTc4wsXOwvB_g")
+	setCLIParams()
+
+	bot, err := tgbotapi.NewBotAPI(telegramToken)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -27,4 +32,9 @@ func main() {
 		bot.Send(tgbotapi.NewMessage(-1001263015029, fmt.Sprintf("%s.\n%s.\nPrezzo: %s.\n\n%s", deal.Title, deal.Author, deal.Price, deal.Link)))
 	}
 
+}
+
+func setCLIParams() {
+	flag.StringVar(&telegramToken, "token", "", "Telegram BOTApi token")
+	flag.Parse()
 }
