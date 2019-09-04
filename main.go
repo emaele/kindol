@@ -36,8 +36,7 @@ func mainBot() {
 
 	for _, deal := range deals {
 		msg := tgbotapi.NewPhotoShare(-1001263015029, deal.Cover)
-		fmt.Println(deal.Cover)
-		msg.Caption = fmt.Sprintf("📚 %s.\n✍️ %s.\n\n💶 %s", deal.Title, deal.Author, deal.Price)
+		msg.Caption = fmt.Sprintf("📚 %s\n✍️ %s\n\n💶 %s", deal.Title, deal.Author, deal.Price)
 		msg.ReplyMarkup = utility.SetupInlineKeyboard(deal.Link)
 		bot.Send(msg)
 	}
