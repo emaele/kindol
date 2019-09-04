@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	//"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -34,8 +35,13 @@ func mainBot() {
 		log.Fatal(err)
 	}
 
+	chatID, err := strconv.ParseInt(os.Getenv("CHATID"), 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, deal := range deals {
-		msg := tgbotapi.NewPhotoShare(-1001263015029, deal.Cover)
+		msg := tgbotapi.NewPhotoShare(chatID, deal.Cover)
 		msg.Caption = fmt.Sprintf("📚 %s\n✍️ %s\n\n💶 %s", deal.Title, deal.Author, deal.Price)
 		msg.ReplyMarkup = utility.SetupInlineKeyboard(deal.Link)
 		bot.Send(msg)
