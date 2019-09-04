@@ -6,24 +6,13 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/zpnk/go-bitly"
+	"gitlab.com/emaele/kind-ol/types"
 )
 
-//URL è il link all'offerta lampo per kindle store
-const URL = "https://www.amazon.it/Offerta-Lampo-Kindle/b?ie=UTF8&node=5689487031"
-
-//Deal è la struttura del libro in offerta lampo
-type Deal struct {
-	Title  string
-	Author string
-	Cover  string
-	Price  string
-	Link   string
-}
-
 // RetrieveDeals ottiene le offerte lampo del giorno e le restituisce in un vettore di Deal
-func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
+func RetrieveDeals(bitly *bitly.Client) ([]types.Deal, error) {
 
-	body := getWebpage(URL)
+	body := getWebpage(types.OffersURL)
 	defer body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -31,11 +20,11 @@ func RetrieveDeals(bitly *bitly.Client) ([]Deal, error) {
 		log.Fatal(err)
 	}
 
-	var deals []Deal
+	var deals []types.Deal
 
 	doc.Find(".a-carousel").First().Find("li").Each(func(i int, b *goquery.Selection) {
 
-		var deal Deal
+		var deal types.Deal
 
 		linksuffix, _ := b.Find("a").Attr("href")
 
