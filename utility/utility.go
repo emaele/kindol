@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -25,6 +26,8 @@ func RetrieveDeals(bitly *bitly.Client) ([]types.Deal, error) {
 	doc.Find(".a-carousel").First().Find("li").Each(func(i int, b *goquery.Selection) {
 
 		var deal types.Deal
+
+		fmt.Printf("Processing book number: %d\n", i+1)
 
 		linksuffix, _ := b.Find("a").Attr("href")
 
