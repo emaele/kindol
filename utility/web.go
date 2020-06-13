@@ -10,7 +10,7 @@ func getWebpage(url string) io.ReadCloser {
 	var client http.Client
 
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "Golang_Spider_Bot/3.0")
+	req.Header.Set("User-Agent", "Golang_scraper/1.0")
 
 	resp, err := client.Do(req)
 	if err != nil {

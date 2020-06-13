@@ -35,14 +35,11 @@ func RetrieveDeals(bitly *bitly.Client) ([]types.Deal, error) {
 
 		deal.Cover = getCover(deal.Link)
 
-		deal.Title, _ = b.Find("a").Attr("title")
+		deal.Title = strings.Trim(b.Find(".acs-product-block__product-title").Text(), "\n")
 
-		deal.Author = b.Find(".acs_product-metadata__contributors").Text()
-		if deal.Author == "" { // L'autore è ficcato in uno spazio a caso
-			deal.Author = strings.TrimSpace(b.Clone().Children().Remove().End().Text())
-		}
+		deal.Author = strings.Trim(b.Find(".acs-product-block__contributor").Text(), "\n")
 
-		price := b.Find(".a-color-price").Text()
+		price := b.Find(".acs-product-block__price .a-offscreen").First().Text()
 		deal.Price = strings.TrimSpace(price)
 
 		deals = append(deals, deal)

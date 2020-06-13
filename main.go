@@ -6,14 +6,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/aws/aws-lambda-go/lambda"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zpnk/go-bitly"
 	"gitlab.com/emaele/kind-ol/utility"
 )
 
 func main() {
-	lambda.Start(mainBot)
+	mainBot()
 }
 
 func mainBot() {
