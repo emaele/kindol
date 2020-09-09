@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/zpnk/go-bitly"
-	"gitlab.com/emaele/kind-ol/utility"
+	"github.com/emaele/kindol/utility"
 )
 
 func main() {

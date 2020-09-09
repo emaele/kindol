@@ -1,6 +1,6 @@
-module gitlab.com/emaele/kind-ol
+module github.com/emaele/kindol
 
-go 1.13
+go 1.15
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.0

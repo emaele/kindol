@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/emaele/kindol/types"
 	"github.com/zpnk/go-bitly"
-	"gitlab.com/emaele/kind-ol/types"
 )
 
 // RetrieveDeals ottiene le offerte lampo del giorno e le restituisce in un vettore di Deal
@@ -31,13 +31,14 @@ func RetrieveDeals(bitly *bitly.Client) ([]types.Deal, error) {
 
 		linksuffix, _ := b.Find("a").Attr("href")
 
-		deal.Link = ShortenURL("https://amazon.it"+cleanLink(linksuffix)+"?&tag=shitposting-21", bitly)
-
+		deal.Link = ShortenURL(fmt.Sprintf("https://amazon.it%s?&tag=shitposting-21", cleanLink(linksuffix)),bitly)
 		deal.Cover = getCover(deal.Link)
 
 		deal.Title = strings.Trim(b.Find(".acs-product-block__product-title").Text(), "\n")
+		deal.Title = strings.TrimPrefix(deal.Title, " ")
 
 		deal.Author = strings.Trim(b.Find(".acs-product-block__contributor").Text(), "\n")
+		deal.Author = strings.TrimPrefix(deal.Author, " ")
 
 		price := b.Find(".acs-product-block__price .a-offscreen").First().Text()
 		deal.Price = strings.TrimSpace(price)
