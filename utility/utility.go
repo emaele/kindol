@@ -31,14 +31,14 @@ func RetrieveDeals(bitly *bitly.Client) ([]types.Deal, error) {
 
 		linksuffix, _ := b.Find("a").Attr("href")
 
-		deal.Link = ShortenURL(fmt.Sprintf("https://amazon.it%s?&tag=shitposting-21", cleanLink(linksuffix)),bitly)
+		deal.Link = ShortenURL(fmt.Sprintf("https://amazon.it%s?&tag=shitposting-21", cleanLink(linksuffix)), bitly)
 		deal.Cover = getCover(deal.Link)
 
 		deal.Title = strings.Trim(b.Find(".acs-product-block__product-title").Text(), "\n")
-		deal.Title = strings.TrimPrefix(deal.Title, " ")
+		deal.Title = strings.TrimLeft(deal.Title, " ")
 
 		deal.Author = strings.Trim(b.Find(".acs-product-block__contributor").Text(), "\n")
-		deal.Author = strings.TrimPrefix(deal.Author, " ")
+		deal.Author = strings.TrimLeft(deal.Author, " ")
 
 		price := b.Find(".acs-product-block__price .a-offscreen").First().Text()
 		deal.Price = strings.TrimSpace(price)
